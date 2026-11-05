@@ -145,7 +145,7 @@ To compile `dnspbr` using an official OpenWrt SDK:
 
 1. Clone or link `dnspbr` into your SDK feeds directory:
    ```bash
-   echo "src-link dnspbr /path/to/dnspbr-wrt" >> feeds.conf.default
+   echo "src-git dnspbr https://github.com/postmdk/dnspbr-wrt.git" >> feeds.conf.default
    ./scripts/feeds update dnspbr
    ./scripts/feeds install dnspbr
    ```
