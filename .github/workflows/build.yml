@@ -1,0 +1,104 @@
+name: Build and Release OpenWrt dnspbr
+
+on:
+  push:
+    branches: [ "main", "master" ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # --- OpenWrt 24.10.8 ---
+          - distro: "24.10.8"
+            target: mediatek/filogic
+            name: aarch64_cortex-a53_24.10.8
+            sdk_url: "https://downloads.openwrt.org/releases/24.10.8/targets/mediatek/filogic/openwrt-sdk-24.10.8-mediatek-filogic_gcc-13.3.0_musl.Linux-x86_64.tar.zst"
+          - distro: "24.10.8"
+            target: ramips/mt7621
+            name: mipsel_24kc_24.10.8
+            sdk_url: "https://downloads.openwrt.org/releases/24.10.8/targets/ramips/mt7621/openwrt-sdk-24.10.8-ramips-mt7621_gcc-13.3.0_musl.Linux-x86_64.tar.zst"
+
+          # --- OpenWrt 25.12.6 (если требуется) ---
+          - distro: "25.12.6"
+            target: mediatek/filogic
+            name: aarch64_cortex-a53_25.12.6
+            sdk_url: "https://downloads.openwrt.org/releases/25.12.6/targets/mediatek/filogic/openwrt-sdk-25.12.6-mediatek-filogic_gcc-14.3.0_musl.Linux-x86_64.tar.zst"
+          - distro: "25.12.6"
+            target: ramips/mt7621
+            name: mipsel_24kc_25.12.6
+            sdk_url: "https://downloads.openwrt.org/releases/25.12.6/targets/ramips/mt7621/openwrt-sdk-25.12.6-ramips-mt7621_gcc-14.3.0_musl.Linux-x86_64.tar.zst"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libncurses-dev gawk git libssl-dev zlib1g-dev libelf-dev wget unzip python3 zstd
+
+      - name: Download and Extract OpenWrt SDK
+        run: |
+          echo "Downloading SDK for ${{ matrix.name }}..."
+          wget -q "${{ matrix.sdk_url }}" -O sdk.tar.zst
+
+          echo "Extracting SDK..."
+          tar --zstd -xf sdk.tar.zst
+          rm -f sdk.tar.zst
+
+          mv openwrt-sdk-* openwrt-sdk
+
+          cd openwrt-sdk
+          echo "src-link dnspbr /home/runner/work/$(basename $GITHUB_REPOSITORY)/$(basename $GITHUB_REPOSITORY)" >> feeds.conf.default
+          ./scripts/feeds update -a
+          ./scripts/feeds install dnspbr
+
+      - name: Compile package
+        run: |
+          cd openwrt-sdk
+          export TERM=xterm-256color
+          make defconfig
+          make package/dnspbr/compile V=s
+
+      - name: Prepare Artifacts Directory
+        run: |
+          mkdir -p compiled-packages
+
+          # Копируем и переименовываем все .apk файлы, добавляя имя матрицы
+          find openwrt-sdk/bin/packages/ -name "*.apk" | while read -r f; do
+            filename=$(basename "$f")
+            name_without_ext="${filename%.*}"
+            ext="${filename##*.}"
+            cp "$f" "compiled-packages/${name_without_ext}-${{ matrix.name }}.${ext}"
+          done
+
+          # Копируем и переименовываем все .ipk файлы, добавляя имя матрицы
+          find openwrt-sdk/bin/packages/ -name "*.ipk" | while read -r f; do
+            filename=$(basename "$f")
+            name_without_ext="${filename%.*}"
+            ext="${filename##*.}"
+            cp "$f" "compiled-packages/${name_without_ext}-${{ matrix.name }}.${ext}"
+          done
+
+      - name: Upload Artifacts to Workflow
+        uses: actions/upload-artifact@v4
+        with:
+          name: dnspbr-package-${{ matrix.name }}-${{ matrix.distro }}
+          path: |
+            openwrt-sdk/bin/packages/**/*.apk
+            openwrt-sdk/bin/packages/**/*.ipk
+
+      - name: Publish Release (on Git Tag)
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          files: compiled-packages/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,74 @@
+#!/bin/sh /etc/rc.common
+
+START=95
+STOP=10
+
+USE_PROCD=1
+find_dnsmasq_dir() {
+    local dir
+    for dir in /tmp/dnsmasq.*.d; do
+        if [ -d "$dir" ]; then
+            echo "$dir"
+            return 0
+        fi
+    done
+    return 1
+}
+sync_dnsmasq_configs() {
+    local dnsmasq_dir=$(find_dnsmasq_dir)
+    [ -z "$dnsmasq_dir" ] && return 1
+    rm -f "$dnsmasq_dir/dnspbr_*.conf"
+    local found=0
+    for conf in /etc/dnspbr/dnsmasq/*.conf; do
+        if [ -f "$conf" ]; then
+            cp "$conf" "$dnsmasq_dir/dnspbr_$(basename "$conf")"
+            found=1
+        fi
+    done
+    if [ "$found" -eq 1 ]; then
+        /etc/init.d/dnsmasq restart
+    fi
+}
+
+start_service() {
+    config_load dnspbr
+    config_get_bool enabled global enabled 0
+    [ "$enabled" -eq 1 ] || return 0
+
+    config_get address global address '0.0.0.0'
+    config_get port global port '5353'
+    config_get upstream global upstream '9.9.9.10'
+    config_get upstream_port global upstream_port '53'
+    config_get range global range ''
+    config_get mark global mark ''
+    config_get tunnel_iface global tunnel_iface ''
+    config_get workers global workers ''
+    config_get_bool daemon global daemon 0
+    config_get_bool verbose global verbose 0
+    sync_dnsmasq_configs
+    procd_open_instance dnspbr
+
+    local cmd="/usr/bin/dnspbr -a $address -p $port -u $upstream"
+    [ -n "$upstream_port" ] && cmd="$cmd -P $upstream_port"
+    [ -n "$range" ] && cmd="$cmd -r $range"
+    [ -n "$mark" ] && cmd="$cmd -m $mark"
+    [ -n "$tunnel_iface" ] && cmd="$cmd -i $tunnel_iface"
+    [ -n "$workers" ] && cmd="$cmd -w $workers"
+    [ "$daemon" -eq 1 ] && cmd="$cmd -d"
+    [ "$verbose" -eq 1 ] && cmd="$cmd -v"
+
+    procd_set_param command $cmd
+    procd_set_param respawn
+    procd_set_param stdout 1
+    procd_set_param stderr 1
+    procd_close_instance
+}
+stop_service() {
+    ip rule del fwmark 0x40 table 100 2>/dev/null
+    ip route flush table 100 2>/dev/null
+    local dnsmasq_dir=$(find_dnsmasq_dir)
+    if [ -n "$dnsmasq_dir" ]; then
+        rm -f "$dnsmasq_dir"/dnspbr_*.conf
+        /etc/init.d/dnsmasq restart
+    fi
+}
