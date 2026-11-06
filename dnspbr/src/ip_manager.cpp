@@ -41,17 +41,17 @@ IPManager::IPManager(const std::string& cidr, const std::string& mark, const std
         } else {
             syslog(LOG_WARNING, "Interface %s specified, but IPv4 address not found yet!", tunnel_interface.c_str());
         }
-        // Сначала удаляем старое правило с такой же меткой, если оно осталось от прошлых запусков
+        // First, we remove any old rule with the same label, should any remain from previous runs.
         string del_old_rule = "ip rule del fwmark " + fw_mark + " table 100 2>/dev/null";
         system(del_old_rule.c_str());
-        // Автоматически добавляем правило политик маршрутизации для меток (fwmark -> таблица 100)
+        // Automatically add a routing policy rule for labels (fwmark -> table 100)
         string rule_cmd = "ip rule add fwmark " + fw_mark + " table 100 2>/dev/null";
         int ret_rule = system(rule_cmd.c_str());
         if (ret_rule != 0 && debug) {
             syslog(LOG_DEBUG, "ip rule add returned non-zero (might already exist)");
         }
 
-        // Направляем дефолтный трафик из таблицы 100 в указанный туннельный интерфейс
+        // We route default traffic from table 100 to the specified tunnel interface.
         string route_cmd = "ip route replace default dev " + tunnel_interface + " table 100";
         int ret_route = system(route_cmd.c_str());
 
@@ -181,7 +181,7 @@ void IPManager::setup_base_structure() {
         return;
     }
 
-    // 5. Создаем независимую таблицу для ранней маркировки ПОСЛЕ основной инициализации
+    // 5.We create an independent table for early tagging, following the main initialization.
     string mark_table_cmd = "add table ip mangle_dnsmap";
     nft_run_cmd_from_buffer(nft, mark_table_cmd.c_str());
 

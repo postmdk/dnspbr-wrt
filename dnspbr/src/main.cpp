@@ -214,7 +214,6 @@ int main(int argc, char** argv) {
             uint8_t buffer[4096];
             struct sockaddr_in client_addr;
             socklen_t client_len = sizeof(client_addr);
-            
             ssize_t n = recvfrom(server_sock, buffer, sizeof(buffer), 0, (struct sockaddr*)&client_addr, &client_len);
             if (n < 0) {
                 if (errno == EAGAIN || errno == EWOULDBLOCK) continue;

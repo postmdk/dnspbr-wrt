@@ -15,10 +15,10 @@ void process_packet(uint8_t*& out_buf, size_t& out_len, uint8_t* in_buf, size_t 
         ldns_rr *q = ldns_rr_list_rr(questions, 0);
         ldns_rr_type type = ldns_rr_get_type(q);
 
-	// Block IPv6 (AAAA) and HTTPS (SVCB) to force IPv4 usage
-	if (type == LDNS_RR_TYPE_AAAA || type == LDNS_RR_TYPE_HTTPS || type == LDNS_RR_TYPE_SVCB) {
+        // Block IPv6 (AAAA) and HTTPS (SVCB) to force IPv4 usage
+         if (type == LDNS_RR_TYPE_AAAA || type == LDNS_RR_TYPE_HTTPS || type == LDNS_RR_TYPE_SVCB) {
 
-	 if (debug) {
+         if (debug) {
           syslog(LOG_DEBUG, "[ DEBUG ]: Blocking query type: %d", type);
          }
           ldns_pkt_set_qr(pkt, true);
