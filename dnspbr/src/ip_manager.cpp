@@ -5,7 +5,7 @@
 #include "nlohmann/json.hpp"
 #include <ifaddrs.h>
 #include <netinet/in.h>
-#include <arpa/inet.h>
+#include <algorithm>
 
 using namespace std;
 using json = nlohmann::json;
@@ -31,7 +31,7 @@ static string get_interface_ip(const std::string& iface_name) {
 }
 
 IPManager::IPManager(const std::string& cidr, const std::string& mark, const std::string& interface_name, bool debug_mode)
-        : fw_mark(mark), tunnel_interface(interface_name), debug(debug_mode) {
+        : debug(debug_mode), fw_mark(mark), tunnel_interface(interface_name) {
     // Configure system routing tables if a specific tunnel interface is specified
     if (!tunnel_interface.empty()) {
         string iface_ip = get_interface_ip(tunnel_interface);
@@ -43,7 +43,7 @@ IPManager::IPManager(const std::string& cidr, const std::string& mark, const std
         }
         // First, we remove any old rule with the same label, should any remain from previous runs.
         string del_old_rule = "ip rule del fwmark " + fw_mark + " table 100 2>/dev/null";
-        system(del_old_rule.c_str());
+        int __attribute__((unused)) res = system(del_old_rule.c_str());
         // Automatically add a routing policy rule for labels (fwmark -> table 100)
         string rule_cmd = "ip rule add fwmark " + fw_mark + " table 100 2>/dev/null";
         int ret_rule = system(rule_cmd.c_str());
@@ -179,7 +179,7 @@ void IPManager::setup_base_structure() {
         return;
     }
 
-    // 5.We create an independent table for early tagging, following the main initialization.
+    // 5. We create an independent table for early tagging, following the main initialization.
     string mark_table_cmd = "add table ip mangle_dnsmap";
     nft_run_cmd_from_buffer(nft, mark_table_cmd.c_str());
 
@@ -223,11 +223,11 @@ uint32_t IPManager::get_or_create(uint32_t real_ip) {
     // Adding an element to a map via JSON
     json add_element = {
             {"nftables", json::array({
-                                             {{"add", {{"element", {
-                                                     {"family", "ip"}, {"table", "dnsmap"}, {"name", "fake_to_real"},
-                                                     {"elem", json::array({ json::array({f_s, r_s}) })}
-                                             }}}}}
-                                     })}
+                {{"add", {{"element", {
+                    {"family", "ip"}, {"table", "dnsmap"}, {"name", "fake_to_real"},
+                    {"elem", json::array({ json::array({f_s, r_s}) })}
+                }}}}}
+            })}
     };
 
     if (nft_run(add_element.dump()) && debug) {
@@ -246,14 +246,14 @@ void IPManager::sync_with_kernel() {
     // Use "list map", this is the most stable way to get elements
     json list_cmd = {
             {"nftables", json::array({
-                                             {{"list", {
-                                                     {"map", {
-                                                             {"family", "ip"},
-                                                             {"table", "dnsmap"},
-                                                             {"name", "fake_to_real"}
-                                                     }}
-                                             }}}
-                                     })}
+                {{"list", {
+                    {"map", {
+                        {"family", "ip"},
+                        {"table", "dnsmap"},
+                        {"name", "fake_to_real"}
+                    }}
+                }}}
+            })}
     };
 
     nft_ctx_buffer_output(nft);
@@ -279,8 +279,6 @@ void IPManager::sync_with_kernel() {
                 // Looking for the "map" object that contains "elem"
                 if (item.contains("map") && item["map"].contains("elem")) {
                     for (auto& elem : item["map"]["elem"]) {
-                        // Format elem в nftables: [key, value]
-                        // But sometimes these are objects, so we take them carefully:
                         string f_s, r_s;
 
                         if (elem.is_array() && elem.size() >= 2) {
