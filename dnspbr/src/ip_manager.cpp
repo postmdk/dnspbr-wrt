@@ -32,7 +32,7 @@ static string get_interface_ip(const std::string& iface_name) {
 
 IPManager::IPManager(const std::string& cidr, const std::string& mark, const std::string& interface_name, bool debug_mode)
         : fw_mark(mark), tunnel_interface(interface_name), debug(debug_mode) {
-    // Если имя интерфейса передано, настраиваем автоматику маршрутизации
+    // Configure system routing tables if a specific tunnel interface is specified
     if (!tunnel_interface.empty()) {
         string iface_ip = get_interface_ip(tunnel_interface);
 
@@ -66,7 +66,6 @@ IPManager::IPManager(const std::string& cidr, const std::string& mark, const std
         }
     }
 
-//-----------
     // Create an nftables context
     nft = nft_ctx_new(NFT_CTX_DEFAULT);
     if (!nft) {
@@ -149,7 +148,6 @@ void IPManager::setup_base_structure() {
     commands.push_back({{"flush", {{"chain", {
             {"family", "ip"}, {"table", "dnsmap"}, {"name", "PREROUTING"}
     }}}}});
-    // ------------------------------------------------
 
     // 4. Forming a DNAT rule
     json rule_match = {
