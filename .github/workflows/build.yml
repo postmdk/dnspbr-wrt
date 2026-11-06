@@ -1,13 +1,13 @@
 name: Build and Release OpenWrt dnspbr
 
 on:
-#  push:
+  push:
 #    branches: [ "main", "master" ]
-#    tags:
-#      - 'v*'
+    tags:
+      - 'v*'
 #  pull_request:
 #    branches: [ "main", "master" ]
-     workflow_dispatch:
+#     workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -92,13 +92,13 @@ jobs:
         with:
           name: dnspbr-package-${{ matrix.name }}-${{ matrix.distro }}
           path: |
-            openwrt-sdk/bin/packages/**/*.apk
-            openwrt-sdk/bin/packages/**/*.ipk
+            openwrt-sdk/bin/packages/**/dnspbr*.apk
+            openwrt-sdk/bin/packages/**/dnspbr*.ipk
 
       - name: Publish Release (on Git Tag)
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/v')
         with:
-          files: compiled-packages/*
+          files: compiled-packages/dnspbr*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
