@@ -6,7 +6,7 @@ STOP=10
 USE_PROCD=1
 find_dnsmasq_dir() {
     local dir
-    for dir in /tmp/dnsmasq.*.d; do
+    for dir in /tmp/dnsmasq*.d; do
         if [ -d "$dir" ]; then
             echo "$dir"
             return 0
