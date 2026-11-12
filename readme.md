@@ -138,7 +138,25 @@ Manage the daemon using standard OpenWrt init commands:
 # Restart daemon
 /etc/init.d/dnspbr restart
 ```
+## Optional: DNS hijacking: Configure firewall to intercept DNS
+### Domain Name System traffic:
+``` bash
+uci -q del firewall.dns_int
+uci set firewall.dns_int="redirect"
+uci set firewall.dns_int.name="Intercept-DNS"
+uci set firewall.dns_int.family="any"
+uci set firewall.dns_int.proto="tcp udp"
+uci set firewall.dns_int.src="lan"
+uci set firewall.dns_int.src_dport="53"
+uci set firewall.dns_int.target="DNAT"
+uci commit firewall
+service firewall restart
+service dnspbr restart
+```
+### Notice
+Restarting the firewall clears DNAT and mark rules, which is why the dnspbr daemon also needs to be restarted.
 
+Also see: [dnsproxy](https://openwrt.org/docs/guide-user/services/dns/dot_dnsmasq_dnsproxy) DoH/DoH3, DoT, DoQ and DNSCrypt with Dnsmasq and dnsproxy
 ## Building from Source
 
 To compile `dnspbr` using an official OpenWrt SDK:
