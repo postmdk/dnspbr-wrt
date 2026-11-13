@@ -79,10 +79,16 @@ config dnspbr 'main'
 | `interface` | `string` | `awg0` | Target network interface to route tagged traffic through. |
 | `workers` | `integer` | `2` | Number of worker threads for processing concurrent DNS resolutions. |
 
-### Dnsmasq Configuration Template
+### Dnsmasq Configuration
 
 `dnspbr` integrates seamlessly with `dnsmasq` by dynamically injecting domain rules into active configuration directories (including chroot/jail environments like `/tmp/dnsmasq.*.d/`).
 
+Need off Rebind protection
+```bash
+uci set dhcp.@dnsmasq[0].rebind_protection='0'
+uci commit dhcp
+service dnsmasq restart
+```
 A template configuration is provided at:
 ```text
 /etc/dnspbr/dnsmasq/dnsmasq.conf.example
