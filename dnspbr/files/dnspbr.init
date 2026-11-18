@@ -74,6 +74,15 @@ stop_service() {
 }
 
 reload_service() {
+    config_load dnspbr
+    config_get new_range global range ''
+    local old_range=""
+    [ -f /var/run/dnspbr.range ] && old_range=$(cat /var/run/dnspbr.range)
+    if [ -n "$old_range" ] && [ "$old_range" != "$new_range" ]; then
+        nft flush table ip dnsmap 2>/dev/null
+        nft delete table ip dnsmap 2>/dev/null
+    fi
+    echo "$new_range" > /var/run/dnspbr.range
     stop
     start
 }
