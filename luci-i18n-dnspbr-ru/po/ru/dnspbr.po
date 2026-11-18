@@ -1,6 +1,13 @@
 msgid ""
+msgstr ""
+"Project-Id-Version: luci-i18n-dnspbr-ru 1.1.4\n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: 2026-11-19 00:00+0000\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
 
 msgid "DNSPBR Settings"
 msgstr "Настройки DNSPBR"
@@ -30,13 +37,13 @@ msgid "Port for the daemon to listen on."
 msgstr "Порт, на котором демон будет принимать подключения."
 
 msgid "Upstream IP"
-msgstr "Внешний IP (Upstream)"
+msgstr "IP-адрес вышестоящего DNS-сервера"
 
 msgid "Upstream DNS server IP address."
 msgstr "IP-адрес вышестоящего DNS-сервера."
 
 msgid "Upstream Port"
-msgstr "Внешний порт (Upstream)"
+msgstr "Порт вышестоящего DNS-сервера"
 
 msgid "Upstream DNS server port."
 msgstr "Порт вышестоящего DNS-сервера."
@@ -45,19 +52,19 @@ msgid "Fake DNS Subnet"
 msgstr "Подсеть Fake DNS"
 
 msgid "Target subnet for Fake DNS policy routing (e.g. 10.30.0.0/16)."
-msgstr "Целевая подсеть для Fake DNS policy routing (например, 10.30.0.0/16)."
+msgstr "Целевая подсеть для маршрутизации Fake DNS на основе политик (например, 10.30.0.0/16)."
 
 msgid "Firewall Mark"
-msgstr "Метка фаервола (Fwmark)"
+msgstr "Метка межсетевого экрана (Fwmark)"
 
 msgid "Firewall mark hex value (e.g. 0x40)."
-msgstr "Шестнадцатеричное значение метки фаервола (например, 0x40)."
+msgstr "Шестнадцатеричное значение метки межсетевого экрана (например, 0x40)."
 
 msgid "Interface"
 msgstr "Интерфейс"
 
 msgid "Network interface name for policy routing (e.g. awg0)."
-msgstr "Имя сетевого интерфейса для маршрутизации (например, awg0)."
+msgstr "Имя сетевого интерфейса для маршрутизации на основе политик (например, awg0)."
 
 msgid "Workers"
 msgstr "Рабочие потоки"
@@ -66,7 +73,7 @@ msgid "Number of worker threads."
 msgstr "Количество рабочих потоков демона."
 
 msgid "Verbose Logging"
-msgstr "Подробное логирование"
+msgstr "Подробное журналирование"
 
 msgid "Enable detailed debug output."
 msgstr "Включить подробный вывод отладочной информации."
@@ -75,10 +82,10 @@ msgid "Domain Lists"
 msgstr "Списки доменов"
 
 msgid "Edit domains for policy routing."
-msgstr "Редактирование доменов для маршрутизации."
+msgstr "Редактирование доменов для маршрутизации на основе политик."
 
 msgid "Edit domains for policy routing. Enter one domain per line (e.g. youtube.com)."
-msgstr "Редактирование доменов для маршрутизации. Вводите по одному домену на строку (например, youtube.com)."
+msgstr "Редактирование доменов для маршрутизации на основе политик. Вводите по одному домену на строку (например, youtube.com)."
 
 msgid "Generate Dnsmasq rules"
 msgstr "Генерировать правила Dnsmasq"
@@ -90,10 +97,10 @@ msgid "Enter domains below (one per line):"
 msgstr "Введите домены ниже (по одному на строку):"
 
 msgid "Domain list saved and applied to Dnsmasq successfully."
-msgstr "Список доменов успешно сохранен и применен к Dnsmasq."
+msgstr "Список доменов успешно сохранён и применён к Dnsmasq."
 
 msgid "Domain list saved successfully (Dnsmasq integration disabled)."
-msgstr "Список доменов успешно сохранен (интеграция с Dnsmasq отключена)."
+msgstr "Список доменов успешно сохранён (интеграция с Dnsmasq отключена)."
 
 msgid "Failed to save file: "
 msgstr "Не удалось сохранить файл: "
@@ -103,15 +110,3 @@ msgstr "Выполняется действие..."
 
 msgid "Please wait while the service is being "
 msgstr "Пожалуйста, подождите, пока служба "
-
-msgid "Domain Lists"
-msgstr "Списки доменов"
-
-msgid "Edit domains for policy routing."
-msgstr "Редактирование доменов для маршрутизации."
-
-msgid "Automatically create server=/domain/ip#port config files"
-msgstr "Автоматически создавать конфигурационные файлы server=/domain/ip#port"
-
-msgid "Enter domains below (one per line):"
-msgstr "Введите домены ниже (по одному на строку):"
