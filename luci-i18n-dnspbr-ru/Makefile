@@ -1,3 +1,4 @@
+
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-i18n-dnspbr-ru
@@ -18,25 +19,32 @@ endef
 
 define Build/Prepare
 	mkdir -p $(PKG_BUILD_DIR)
-	# Копируем все .po файлы из папки po/ru в корень сборки
-	find ./po -name "*.po" -exec $(CP) {} $(PKG_BUILD_DIR)/ \;
-endef
-
-define Build/Configure
+	@set -- ./po/ru/*.po; \
+	if [ ! -f "$$1" ] || [ "$$#" -ne 1 ]; then \
+		echo "ERROR: Expected exactly one Russian PO file in ./po/ru/"; \
+		exit 1; \
+	fi; \
+	$(CP) "$$1" $(PKG_BUILD_DIR)/translation.po
 endef
 
 define Build/Compile
-	# Компилируем каждый .po в .lmo и падаем с ошибкой, если файла нет
-	for po in $(PKG_BUILD_DIR)/*.po; do \
-		[ -f "$$po" ] || exit 1; \
-		po2lmo "$$po" "$$po.lmo"; \
-	done
+	@po2lmo \
+		$(PKG_BUILD_DIR)/translation.po \
+		$(PKG_BUILD_DIR)/dnspbr.ru.lmo || { \
+		echo "ERROR: Failed to compile Russian translation"; \
+		exit 1; \
+	}
+	@test -s $(PKG_BUILD_DIR)/dnspbr.ru.lmo || { \
+		echo "ERROR: Compiled translation is empty"; \
+		exit 1; \
+	}
 endef
 
 define Package/luci-i18n-dnspbr-ru/install
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/i18n
-	# Устанавливаем скомпилированный файл под именем dnspbr.ru.lmo
-	$(INSTALL_DATA) $(PKG_BUILD_DIR)/*.lmo $(1)/usr/lib/lua/luci/i18n/dnspbr.ru.lmo
+	$(INSTALL_DATA) \
+		$(PKG_BUILD_DIR)/dnspbr.ru.lmo \
+		$(1)/usr/lib/lua/luci/i18n/dnspbr.ru.lmo
 endef
 
 $(eval $(call BuildPackage,luci-i18n-dnspbr-ru))
