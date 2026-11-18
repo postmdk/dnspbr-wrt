@@ -18,23 +18,25 @@ endef
 
 define Build/Prepare
 	mkdir -p $(PKG_BUILD_DIR)
-	$(CP) ./po $(PKG_BUILD_DIR)/
+	# Копируем все .po файлы из папки po/ru в корень сборки
+	find ./po -name "*.po" -exec $(CP) {} $(PKG_BUILD_DIR)/ \;
 endef
 
 define Build/Configure
 endef
 
 define Build/Compile
-	for po in $(PKG_BUILD_DIR)/po/ru/*.po; do \
-		[ -f "$$po" ] && po2lmo "$$po" "$$po.lmo" || true; \
+	# Компилируем каждый .po в .lmo и падаем с ошибкой, если файла нет
+	for po in $(PKG_BUILD_DIR)/*.po; do \
+		[ -f "$$po" ] || exit 1; \
+		po2lmo "$$po" "$$po.lmo"; \
 	done
 endef
 
 define Package/luci-i18n-dnspbr-ru/install
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/i18n
-	for po in $(PKG_BUILD_DIR)/po/ru/*.po; do \
-		[ -f "$$po" ] && $(INSTALL_DATA) "$$po.lmo" $(1)/usr/lib/lua/luci/i18n/dnspbr.ru.lmo || true; \
-	done
+	# Устанавливаем скомпилированный файл под именем dnspbr.ru.lmo
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/*.lmo $(1)/usr/lib/lua/luci/i18n/dnspbr.ru.lmo
 endef
 
 $(eval $(call BuildPackage,luci-i18n-dnspbr-ru))
