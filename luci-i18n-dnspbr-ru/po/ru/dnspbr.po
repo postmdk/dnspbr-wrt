@@ -103,3 +103,15 @@ msgstr "Выполняется действие..."
 
 msgid "Please wait while the service is being "
 msgstr "Пожалуйста, подождите, пока служба "
+
+msgid "Domain Lists"
+msgstr "Списки доменов"
+
+msgid "Edit domains for policy routing."
+msgstr "Редактирование доменов для маршрутизации."
+
+msgid "Automatically create server=/domain/ip#port config files"
+msgstr "Автоматически создавать конфигурационные файлы server=/domain/ip#port"
+
+msgid "Enter domains below (one per line):"
+msgstr "Введите домены ниже (по одному на строку):"
