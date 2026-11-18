@@ -1,13 +1,10 @@
-name: Build and Release OpenWrt dnspbr
+name: Build and Release OpenWrt dnspbr-wrt
 
 on:
   push:
-#    branches: [ "main", "master" ]
     tags:
       - 'v*'
-#  pull_request:
-#    branches: [ "main", "master" ]
-#     workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -25,7 +22,7 @@ jobs:
             name: mipsel_24kc_24.10.8
             sdk_url: "https://downloads.openwrt.org/releases/24.10.8/targets/ramips/mt7621/openwrt-sdk-24.10.8-ramips-mt7621_gcc-13.3.0_musl.Linux-x86_64.tar.zst"
 
-          # --- OpenWrt 25.12.6 (если требуется) ---
+          # --- OpenWrt 25.12.6 ---
           - distro: "25.12.6"
             target: mediatek/filogic
             name: aarch64_cortex-a53_25.12.6
@@ -56,31 +53,32 @@ jobs:
           mv openwrt-sdk-* openwrt-sdk
 
           cd openwrt-sdk
-          echo "src-link dnspbr /home/runner/work/$(basename $GITHUB_REPOSITORY)/$(basename $GITHUB_REPOSITORY)" >> feeds.conf.default
+          # Подключаем весь репозиторий целиком как локальный фид
+          echo "src-link dnspbr_feed /home/runner/work/$(basename $GITHUB_REPOSITORY)/$(basename $GITHUB_REPOSITORY)" >> feeds.conf.default
           ./scripts/feeds update -a
+          
+          # Устанавливаем все три компонента экосистемы
           ./scripts/feeds install dnspbr
+          ./scripts/feeds install luci-app-dnspbr
+          ./scripts/feeds install luci-i18n-dnspbr-ru
 
-      - name: Compile package
+      - name: Compile packages
         run: |
           cd openwrt-sdk
           export TERM=xterm-256color
           make defconfig
+          
+          # Собираем все три пакета последовательно
           make package/dnspbr/compile V=s
+          make package/luci-app-dnspbr/compile V=s
+          make package/luci-i18n-dnspbr-ru/compile V=s
 
       - name: Prepare Artifacts Directory
         run: |
           mkdir -p compiled-packages
 
-          # Копируем и переименовываем все .apk файлы, добавляя имя матрицы
-          find openwrt-sdk/bin/packages/ -name "*.apk" | while read -r f; do
-            filename=$(basename "$f")
-            name_without_ext="${filename%.*}"
-            ext="${filename##*.}"
-            cp "$f" "compiled-packages/${name_without_ext}-${{ matrix.name }}.${ext}"
-          done
-
-          # Копируем и переименовываем все .ipk файлы, добавляя имя матрицы
-          find openwrt-sdk/bin/packages/ -name "*.ipk" | while read -r f; do
+          # Собираем все собранные пакетики (.ipk / .apk) в одну папку для релиза
+          find openwrt-sdk/bin/packages/ -name "*dnspbr*.ipk" -o -name "*dnspbr*.apk" | while read -r f; do
             filename=$(basename "$f")
             name_without_ext="${filename%.*}"
             ext="${filename##*.}"
@@ -90,15 +88,13 @@ jobs:
       - name: Upload Artifacts to Workflow
         uses: actions/upload-artifact@v4
         with:
-          name: dnspbr-package-${{ matrix.name }}-${{ matrix.distro }}
-          path: |
-            openwrt-sdk/bin/packages/**/dnspbr*.apk
-            openwrt-sdk/bin/packages/**/dnspbr*.ipk
+          name: dnspbr-packages-${{ matrix.name }}-${{ matrix.distro }}
+          path: compiled-packages/*
 
       - name: Publish Release (on Git Tag)
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/v')
         with:
-          files: compiled-packages/dnspbr*
+          files: compiled-packages/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
