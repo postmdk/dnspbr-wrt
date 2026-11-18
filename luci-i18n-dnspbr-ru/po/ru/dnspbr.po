@@ -1,0 +1,105 @@
+msgid ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "DNSPBR Settings"
+msgstr "Настройки DNSPBR"
+
+msgid "Configuration parameters for dnspbr daemon and policy routing."
+msgstr "Параметры конфигурации демона dnspbr и маршрутизации на основе политик."
+
+msgid "General Settings"
+msgstr "Общие настройки"
+
+msgid "Enabled"
+msgstr "Включено"
+
+msgid "Enable or disable dnspbr service."
+msgstr "Включить или отключить службу dnspbr."
+
+msgid "Listen IP"
+msgstr "IP-адрес прослушивания"
+
+msgid "IP address for the daemon to listen on."
+msgstr "IP-адрес, на котором демон будет принимать подключения."
+
+msgid "Listen Port"
+msgstr "Порт прослушивания"
+
+msgid "Port for the daemon to listen on."
+msgstr "Порт, на котором демон будет принимать подключения."
+
+msgid "Upstream IP"
+msgstr "Внешний IP (Upstream)"
+
+msgid "Upstream DNS server IP address."
+msgstr "IP-адрес вышестоящего DNS-сервера."
+
+msgid "Upstream Port"
+msgstr "Внешний порт (Upstream)"
+
+msgid "Upstream DNS server port."
+msgstr "Порт вышестоящего DNS-сервера."
+
+msgid "Fake DNS Subnet"
+msgstr "Подсеть Fake DNS"
+
+msgid "Target subnet for Fake DNS policy routing (e.g. 10.30.0.0/16)."
+msgstr "Целевая подсеть для Fake DNS policy routing (например, 10.30.0.0/16)."
+
+msgid "Firewall Mark"
+msgstr "Метка фаервола (Fwmark)"
+
+msgid "Firewall mark hex value (e.g. 0x40)."
+msgstr "Шестнадцатеричное значение метки фаервола (например, 0x40)."
+
+msgid "Interface"
+msgstr "Интерфейс"
+
+msgid "Network interface name for policy routing (e.g. awg0)."
+msgstr "Имя сетевого интерфейса для маршрутизации (например, awg0)."
+
+msgid "Workers"
+msgstr "Рабочие потоки"
+
+msgid "Number of worker threads."
+msgstr "Количество рабочих потоков демона."
+
+msgid "Verbose Logging"
+msgstr "Подробное логирование"
+
+msgid "Enable detailed debug output."
+msgstr "Включить подробный вывод отладочной информации."
+
+msgid "Domain Lists"
+msgstr "Списки доменов"
+
+msgid "Edit domains for policy routing."
+msgstr "Редактирование доменов для маршрутизации."
+
+msgid "Edit domains for policy routing. Enter one domain per line (e.g. youtube.com)."
+msgstr "Редактирование доменов для маршрутизации. Вводите по одному домену на строку (например, youtube.com)."
+
+msgid "Generate Dnsmasq rules"
+msgstr "Генерировать правила Dnsmasq"
+
+msgid "Automatically create server=/domain/ip#port config files"
+msgstr "Автоматически создавать конфигурационные файлы server=/domain/ip#port"
+
+msgid "Enter domains below (one per line):"
+msgstr "Введите домены ниже (по одному на строку):"
+
+msgid "Domain list saved and applied to Dnsmasq successfully."
+msgstr "Список доменов успешно сохранен и применен к Dnsmasq."
+
+msgid "Domain list saved successfully (Dnsmasq integration disabled)."
+msgstr "Список доменов успешно сохранен (интеграция с Dnsmasq отключена)."
+
+msgid "Failed to save file: "
+msgstr "Не удалось сохранить файл: "
+
+msgid "Action in progress..."
+msgstr "Выполняется действие..."
+
+msgid "Please wait while the service is being "
+msgstr "Пожалуйста, подождите, пока служба "

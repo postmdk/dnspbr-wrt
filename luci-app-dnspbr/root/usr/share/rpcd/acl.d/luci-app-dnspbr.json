@@ -1,0 +1,22 @@
+{
+  "luci-app-dnspbr": {
+    "description": "Grant UCI, file and ubus status access for luci-app-dnspbr",
+    "read": {
+      "uci": [ "dnspbr" ],
+      "ubus": {
+        "service": [ "*" ]
+      },
+      "file": {
+        "/etc/dnspbr/*": [ "read" ],
+        "/etc/init.d/dnspbr": [ "exec" ]
+      }
+    },
+    "write": {
+      "uci": [ "dnspbr" ],
+      "file": {
+        "/etc/dnspbr/*": [ "write" ],
+        "/etc/init.d/dnspbr": [ "exec" ]
+      }
+    }
+  }
+}

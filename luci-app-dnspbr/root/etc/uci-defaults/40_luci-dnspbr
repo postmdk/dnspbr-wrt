@@ -1,0 +1,8 @@
+#!/bin/sh
+uci -q get dnspbr.global >/dev/null || {
+    uci set dnspbr.global='global'
+    uci set dnspbr.global.enabled='0'
+    uci set dnspbr.global.port='5353'
+    uci commit dnspbr
+}
+exit 0
