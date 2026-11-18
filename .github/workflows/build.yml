@@ -71,7 +71,7 @@ jobs:
           # Собираем все три пакета последовательно
           make package/dnspbr/compile V=s
           make package/luci-app-dnspbr/compile V=s
-          make package/luci-i18n-dnspbr-ru/compile V=s
+          #make package/luci-i18n-dnspbr-ru/compile V=s
 
       - name: Prepare Artifacts Directory
         run: |
