@@ -28,7 +28,7 @@ define Build/Prepare
 endef
 
 define Build/Compile
-	@po2lmo \
+	@$(STAGING_DIR_HOST)/bin/po2lmo \
 		$(PKG_BUILD_DIR)/translation.po \
 		$(PKG_BUILD_DIR)/dnspbr.ru.lmo || { \
 		echo "ERROR: Failed to compile Russian translation"; \
