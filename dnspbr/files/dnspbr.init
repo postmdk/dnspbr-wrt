@@ -34,7 +34,6 @@ start_service() {
     config_load dnspbr
     config_get_bool enabled global enabled 0
     [ "$enabled" -eq 1 ] || return 0
-
     config_get address global address '0.0.0.0'
     config_get port global port '5353'
     config_get upstream global upstream '9.9.9.10'
@@ -43,10 +42,11 @@ start_service() {
     config_get mark global mark ''
     config_get tunnel_iface global tunnel_iface ''
     config_get workers global workers ''
-    config_get_bool daemon global daemon 0
     config_get_bool verbose global verbose 0
+
     sync_dnsmasq_configs
-    procd_open_instance dnspbr
+
+    procd_open_instance "dnspbr"
 
     local cmd="/usr/bin/dnspbr -a $address -p $port -u $upstream"
     [ -n "$upstream_port" ] && cmd="$cmd -P $upstream_port"
@@ -54,16 +54,16 @@ start_service() {
     [ -n "$mark" ] && cmd="$cmd -m $mark"
     [ -n "$tunnel_iface" ] && cmd="$cmd -i $tunnel_iface"
     [ -n "$workers" ] && cmd="$cmd -w $workers"
-    [ "$daemon" -eq 1 ] && cmd="$cmd -d"
     [ "$verbose" -eq 1 ] && cmd="$cmd -v"
-
     procd_set_param command $cmd
     procd_set_param respawn
     procd_set_param stdout 1
     procd_set_param stderr 1
     procd_close_instance
 }
+
 stop_service() {
+    service_stop /usr/bin/dnspbr
     ip rule del fwmark 0x40 table 100 2>/dev/null
     ip route flush table 100 2>/dev/null
     local dnsmasq_dir=$(find_dnsmasq_dir)
@@ -71,4 +71,13 @@ stop_service() {
         rm -f "$dnsmasq_dir"/dnspbr_*.conf
         /etc/init.d/dnsmasq restart
     fi
+}
+
+reload_service() {
+    stop
+    start
+}
+
+service_triggers() {
+    procd_add_reload_trigger "dnspbr"
 }
