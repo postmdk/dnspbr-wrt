@@ -19,12 +19,7 @@ endef
 
 define Build/Prepare
 	mkdir -p $(PKG_BUILD_DIR)
-	@set -- "$(CURDIR)"/po/ru/*.po; \
-	if [ ! -f "$$1" ] || [ "$$#" -ne 1 ]; then \
-	echo "ERROR: Expected exactly one Russian PO file in $(CURDIR)/po/ru/"; \
-	exit 1; \
-	fi; \
-	$(CP) "$$1" $(PKG_BUILD_DIR)/translation.po
+	$(CP) "$(CURDIR)/po/ru/dnspbr.po" $(PKG_BUILD_DIR)/translation.po
 endef
 
 define Build/Compile
