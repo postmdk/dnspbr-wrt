@@ -57,7 +57,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libncurses-dev gawk git libssl-dev zlib1g-dev libelf-dev wget unzip python3 zstd
+          sudo apt-get install -y coreutils libncurses-dev gawk git libssl-dev zlib1g-dev libelf-dev wget unzip python3 zstd
 
       - name: Download and Extract OpenWrt SDK
         run: |
