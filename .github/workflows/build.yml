@@ -56,7 +56,7 @@ jobs:
           # Подключаем весь репозиторий целиком как локальный фид
           echo "src-link dnspbr_feed /home/runner/work/$(basename $GITHUB_REPOSITORY)/$(basename $GITHUB_REPOSITORY)" >> feeds.conf.default
           ./scripts/feeds update -a
-          
+
           # Устанавливаем все три компонента экосистемы
           ./scripts/feeds install dnspbr
           ./scripts/feeds install luci-app-dnspbr
@@ -67,11 +67,11 @@ jobs:
           cd openwrt-sdk
           export TERM=xterm-256color
           make defconfig
-          
+
           # Собираем все три пакета последовательно
           make package/dnspbr/compile V=s
           make package/luci-app-dnspbr/compile V=s
-          #make package/luci-i18n-dnspbr-ru/compile V=s
+          make package/luci-i18n-dnspbr-ru/compile V=s
 
       - name: Prepare Artifacts Directory
         run: |
