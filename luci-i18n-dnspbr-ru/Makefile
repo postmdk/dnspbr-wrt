@@ -6,6 +6,7 @@ PKG_VERSION:=1.1.4
 PKG_RELEASE:=1
 
 PKGARCH:=all
+PKG_BUILD_DEPENDS:=luci-base/host
 
 include $(INCLUDE_DIR)/package.mk
 
