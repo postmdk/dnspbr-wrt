@@ -57,7 +57,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y coreutils libncurses-dev gawk git libssl-dev zlib1g-dev libelf-dev wget unzip python3 zstd
+          sudo apt-get install -y libncurses-dev gawk git libssl-dev zlib1g-dev libelf-dev wget unzip python3 zstd
 
       - name: Download and Extract OpenWrt SDK
         run: |
@@ -84,12 +84,12 @@ jobs:
         run: |
           cd openwrt-sdk
           export TERM=xterm-256color
-          make defconfig
+          make defconfig FORCE=1
 
           # Собираем все три пакета последовательно
-          make package/dnspbr/compile V=s
-          make package/luci-app-dnspbr/compile V=s
-          make package/luci-i18n-dnspbr-ru/compile V=s
+          make package/dnspbr/compile V=s FORCE=1
+          make package/luci-app-dnspbr/compile V=s FORCE=1
+          make package/luci-i18n-dnspbr-ru/compile V=s FORCE=1
 
       - name: Prepare Artifacts Directory
         run: |
