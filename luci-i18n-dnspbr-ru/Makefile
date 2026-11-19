@@ -24,16 +24,10 @@ define Build/Prepare
 endef
 
 define Build/Compile
-	@$(STAGING_DIR_HOST)/bin/po2lmo \
-		$(PKG_BUILD_DIR)/translation.po \
-		$(PKG_BUILD_DIR)/dnspbr.ru.lmo || { \
-		echo "ERROR: Failed to compile Russian translation"; \
-		exit 1; \
-	}
-	@test -s $(PKG_BUILD_DIR)/dnspbr.ru.lmo || { \
-		echo "ERROR: Compiled translation is empty"; \
-		exit 1; \
-	}
+	@$(STAGING_DIR_HOSTPKG)/bin/po2lmo \
+	$(PKG_BUILD_DIR)/translation.po \
+	$(PKG_BUILD_DIR)/dnspbr.ru.lmo
+	@test -s $(PKG_BUILD_DIR)/dnspbr.ru.lmo
 endef
 
 define Package/luci-i18n-dnspbr-ru/install
