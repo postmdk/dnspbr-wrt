@@ -101,7 +101,7 @@ To use it:
    ```
 2. Add your target domain rules inside the file.
 3. Upon startup, the `dnspbr` daemon will automatically detect all `*.conf` files in `/etc/dnspbr/dnsmasq/` and configure `dnsmasq` accordingly.
-
+4. Package luci-app-dnspbr for use gui
 ## Hardware & Resource Overhead Notes
 
 * **RAM Usage:** ~12 MB Resident Set Size (RSS) under average workload.
@@ -118,13 +118,13 @@ Download the latest release for your architecture and OpenWrt version from the [
 
 ```bash
 opkg update
-opkg install dnspbr-1.1.3-r1-aarch64_cortex-a53_24.10.8.ipk
+opkg install dnspbr-<pkg_ver>-<arc>_24.10.8.ipk
 ```
 
 #### OpenWrt 25.12.x (`.apk` packages):
 
 ```bash
-apk add --allow-untrusted dnspbr-1.1.3-r1-aarch64_cortex-a53_25.12.6.apk
+apk add --allow-untrusted dnspbr-<pkg_ver>-<arc>_25.12.6.apk
 ```
 
 ## Service Management
@@ -170,14 +170,16 @@ To compile `dnspbr` using an official OpenWrt SDK:
 1. Clone or link `dnspbr` into your SDK feeds directory:
    ```bash
    echo "src-git dnspbr https://github.com/postmdk/dnspbr-wrt.git" >> feeds.conf.default
-   ./scripts/feeds update dnspbr
-   ./scripts/feeds install dnspbr
+   ./scripts/feeds update -a
+   ./scripts/feeds install -a
    ```
 
 2. Configure and compile:
    ```bash
    make defconfig
    make package/dnspbr/compile V=s
+   make package/luci-app-dnspbr/compile V=s
+   make package/luci-i18n-dnspbr-ru/compile V=s
    ```
 
 3. Compiled output will be available under:
