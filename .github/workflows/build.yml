@@ -12,6 +12,16 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # --- OpenWrt 23.05.6 ---
+          - distro: "23.05.6"
+            target: ramips/mt7621
+            name: mipsel_24kc_mt7621_23.05.6
+            sdk_url: "https://downloads.openwrt.org/releases/23.05.6/targets/ramips/mt7621/openwrt-sdk-23.05.6-ramips-mt7621_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
+          - distro: "23.05.6"
+            target: ramips/mt76x8
+            name: mipsel_24kc_mt76x8_23.05.6
+            sdk_url: "https://downloads.openwrt.org/releases/23.05.6/targets/ramips/mt76x8/openwrt-sdk-23.05.6-ramips-mt76x8_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
+
           # --- OpenWrt 24.10.8 ---
           - distro: "24.10.8"
             target: mediatek/filogic
@@ -19,8 +29,12 @@ jobs:
             sdk_url: "https://downloads.openwrt.org/releases/24.10.8/targets/mediatek/filogic/openwrt-sdk-24.10.8-mediatek-filogic_gcc-13.3.0_musl.Linux-x86_64.tar.zst"
           - distro: "24.10.8"
             target: ramips/mt7621
-            name: mipsel_24kc_24.10.8
+            name: mipsel_24kc_mt7621_24.10.8
             sdk_url: "https://downloads.openwrt.org/releases/24.10.8/targets/ramips/mt7621/openwrt-sdk-24.10.8-ramips-mt7621_gcc-13.3.0_musl.Linux-x86_64.tar.zst"
+          - distro: "24.10.8"
+            target: ramips/mt76x8
+            name: mipsel_24kc_mt76x8_24.10.8
+            sdk_url: "https://downloads.openwrt.org/releases/24.10.8/targets/ramips/mt76x8/openwrt-sdk-24.10.8-ramips-mt76x8_gcc-13.3.0_musl.Linux-x86_64.tar.zst"
 
           # --- OpenWrt 25.12.6 ---
           - distro: "25.12.6"
@@ -29,8 +43,12 @@ jobs:
             sdk_url: "https://downloads.openwrt.org/releases/25.12.6/targets/mediatek/filogic/openwrt-sdk-25.12.6-mediatek-filogic_gcc-14.3.0_musl.Linux-x86_64.tar.zst"
           - distro: "25.12.6"
             target: ramips/mt7621
-            name: mipsel_24kc_25.12.6
+            name: mipsel_24kc_mt7621_25.12.6
             sdk_url: "https://downloads.openwrt.org/releases/25.12.6/targets/ramips/mt7621/openwrt-sdk-25.12.6-ramips-mt7621_gcc-14.3.0_musl.Linux-x86_64.tar.zst"
+          - distro: "25.12.6"
+            target: ramips/mt76x8
+            name: mipsel_24kc_mt76x8_25.12.6
+            sdk_url: "https://downloads.openwrt.org/releases/25.12.6/targets/ramips/mt76x8/openwrt-sdk-25.12.6-ramips-mt76x8_gcc-14.3.0_musl.Linux-x86_64.tar.zst"
 
     steps:
       - name: Checkout repository
