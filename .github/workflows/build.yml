@@ -62,11 +62,11 @@ jobs:
       - name: Download and Extract OpenWrt SDK
         run: |
           echo "Downloading SDK for ${{ matrix.name }}..."
-          wget -q "${{ matrix.sdk_url }}" -O sdk.tar.zst
+          wget -q "${{ matrix.sdk_url }}" -O sdk.tar
 
           echo "Extracting SDK..."
-          tar --zstd -xf sdk.tar.zst
-          rm -f sdk.tar.zst
+          tar -xf sdk.tar
+          rm -f sdk.tar
 
           mv openwrt-sdk-* openwrt-sdk
 
