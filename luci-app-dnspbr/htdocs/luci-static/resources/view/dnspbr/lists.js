@@ -37,7 +37,7 @@ return view.extend({
                 cleanDomains.push(domain);
             }
 
-            // Если галочка снята — сохраняем чистый список доменов как есть (без парсинга)
+            // If the checkbox is unchecked, we save the raw list of domains as is (without parsing).
             if (!useDnsmasq) {
                 var savedText = cleanDomains.join('\n') + (cleanDomains.length > 0 ? '\n' : '');
                 return Promise.all([
@@ -53,7 +53,7 @@ return view.extend({
                 });
             }
 
-            // Если галочка включена — генерируем правила для dnsmasq
+            // If the checkbox is selected, we generate rules for dnsmasq.
             var ip = uci.get('dnspbr', 'global', 'address') || '127.0.0.1';
             var port = uci.get('dnspbr', 'global', 'port') || '5353';
 

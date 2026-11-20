@@ -45,7 +45,7 @@ return view.extend({
 
         var m, s, o;
 
-        // Обработчики кнопок
+        // Button handlers
         window.handleServiceAction = function(action) {
             ui.showModal(_('Action in progress...'), [
                 E('p', { class: 'spinning' }, _('Please wait while the service is being ' + action + 'ed...'))

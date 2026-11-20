@@ -7,7 +7,6 @@ PKG_RELEASE:=1
 PKG_LICENSE:=MIT
 PKG_MAINTAINER:=postmdk
 
-# Пакет является чисто конфигурационным/скриптовым (не компилируется под конкретный CPU)
 PKGARCH:=all
 
 include $(TOPDIR)/feeds/luci/luci.mk
