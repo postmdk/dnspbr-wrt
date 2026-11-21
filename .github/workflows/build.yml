@@ -75,18 +75,18 @@ jobs:
           echo "src-link dnspbr_feed /home/runner/work/$(basename $GITHUB_REPOSITORY)/$(basename $GITHUB_REPOSITORY)" >> feeds.conf.default
           ./scripts/feeds update -a
 
-          # Устанавливаем все три компонента экосистемы
+          # Устанавливаем все фиды
           ./scripts/feeds install -a
 
       - name: Compile packages
         run: |
           cd openwrt-sdk
           export TERM=xterm-256color
-          make defconfig FORCE=1
+          make defconfig
 
-          # Собираем все три пакета последовательно
-          make -j $(nproc) package/dnspbr/compile V=s FORCE=1
-          make -j $(nproc) package/luci-app-dnspbr/compile V=s FORCE=1
+          # Собираем все пакеты последовательно
+          make package/dnspbr/compile V=s
+          make package/luci-app-dnspbr/compile V=s
 
       - name: Prepare Artifacts Directory
         run: |
