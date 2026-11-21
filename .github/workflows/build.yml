@@ -76,9 +76,7 @@ jobs:
           ./scripts/feeds update -a
 
           # Устанавливаем все три компонента экосистемы
-          ./scripts/feeds install dnspbr
-          ./scripts/feeds install luci-app-dnspbr
-          ./scripts/feeds install luci-i18n-dnspbr-ru
+          ./scripts/feeds install -a
 
       - name: Compile packages
         run: |
@@ -87,9 +85,8 @@ jobs:
           make defconfig FORCE=1
 
           # Собираем все три пакета последовательно
-          make package/dnspbr/compile V=s FORCE=1
-          make package/luci-app-dnspbr/compile V=s FORCE=1
-          make package/luci-i18n-dnspbr-ru/compile V=s FORCE=1
+          make -j $(nproc) package/dnspbr/compile V=s FORCE=1
+          make -j $(nproc) package/luci-app-dnspbr/compile V=s FORCE=1
 
       - name: Prepare Artifacts Directory
         run: |

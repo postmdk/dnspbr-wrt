@@ -179,7 +179,6 @@ To compile `dnspbr` using an official OpenWrt SDK:
    make defconfig
    make package/dnspbr/compile V=s
    make package/luci-app-dnspbr/compile V=s
-   make package/luci-i18n-dnspbr-ru/compile V=s
    ```
 
 3. Compiled output will be available under:
