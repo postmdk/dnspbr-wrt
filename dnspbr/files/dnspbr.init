@@ -64,6 +64,14 @@ cleanup_instance() {
 	[ -n "$route_table" ] && ip route flush table "$route_table" 2>/dev/null
 }
 
+get_instance_iface() {
+	local s="$1"
+	local iface
+	config_get iface "$s" "interface" ""
+	[ -z "$iface" ] && config_get iface "$s" "tunnel_iface" ""
+	printf '%s\n' "$iface"
+}
+
 start_instance() {
 	local s="$1"
 
@@ -72,7 +80,8 @@ start_instance() {
 	[ "$enabled" -eq 1 ] || return 0
 
 	local address port upstream upstream_port range mark table route_table tunnel_iface workers verbose
-	config_get address "$s" "address" "0.0.0.0"
+	config_get address "$s" "listen" ""
+	[ -z "$address" ] && config_get address "$s" "address" "0.0.0.0"
 	config_get port "$s" "port" "5353"
 	config_get upstream "$s" "upstream" "9.9.9.10"
 	config_get upstream_port "$s" "upstream_port" "53"
@@ -80,7 +89,7 @@ start_instance() {
 	config_get mark "$s" "mark" "0"
 	config_get table "$s" "table" "dnsmap_${s}"
 	config_get route_table "$s" "route_table" "100"
-	config_get tunnel_iface "$s" "tunnel_iface" ""
+	tunnel_iface=$(get_instance_iface "$s")
 	config_get workers "$s" "workers" ""
 	config_get_bool verbose "$s" "verbose" 0
 
@@ -126,7 +135,7 @@ add_iface_trigger() {
 	local enabled tunnel_iface
 	config_get_bool enabled "$s" "enabled" 0
 	[ "$enabled" -eq 1 ] || return 0
-	config_get tunnel_iface "$s" "tunnel_iface" ""
+	tunnel_iface=$(get_instance_iface "$s")
 	if [ -n "$tunnel_iface" ]; then
 		procd_add_interface_trigger "interface.*.up" "$tunnel_iface" /etc/init.d/dnspbr restart
 	fi

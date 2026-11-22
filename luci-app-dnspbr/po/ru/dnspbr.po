@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: luci-i18n-dnspbr-ru 1.1.4\n"
+"Project-Id-Version: luci-i18n-dnspbr-ru 1.1.6\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-11-19 00:00+0000\n"
+"PO-Revision-Date: 2026-11-22 13:00+0000\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -12,14 +12,68 @@ msgstr ""
 msgid "DNSPBR Settings"
 msgstr "Настройки DNSPBR"
 
+msgid "Multi-instance configuration for dnspbr daemon and policy routing."
+msgstr "Многоэкземплярная конфигурация демона dnspbr и маршрутизации на основе политик."
+
 msgid "Configuration parameters for dnspbr daemon and policy routing."
 msgstr "Параметры конфигурации демона dnspbr и маршрутизации на основе политик."
 
 msgid "General Settings"
 msgstr "Общие настройки"
 
+msgid "Instances"
+msgstr "Экземпляры"
+
+msgid "Each instance runs an independent DNS listener, nftables set/table, and routing table."
+msgstr "Каждый экземпляр запускает независимый DNS-слушатель, таблицу/набор nftables и таблицу маршрутизации."
+
+msgid "Add instance"
+msgstr "Добавить экземпляр"
+
+msgid "Service Status"
+msgstr "Состояние службы"
+
+msgid "Service Status: "
+msgstr "Состояние службы: "
+
+msgid "Running (%d/%d)"
+msgstr "Запущено (%d/%d)"
+
+msgid "Stopped"
+msgstr "Остановлено"
+
+msgid "Start"
+msgstr "Запустить"
+
+msgid "Stop"
+msgstr "Остановить"
+
+msgid "Restart"
+msgstr "Перезапустить"
+
+msgid "Service action"
+msgstr "Действие со службой"
+
+msgid "Starting dnspbr..."
+msgstr "Запуск dnspbr..."
+
+msgid "Stopping dnspbr..."
+msgstr "Остановка dnspbr..."
+
+msgid "Restarting dnspbr..."
+msgstr "Перезапуск dnspbr..."
+
+msgid "Executing action..."
+msgstr "Выполнение действия..."
+
+msgid "Failed to execute action: "
+msgstr "Не удалось выполнить действие: "
+
 msgid "Enabled"
 msgstr "Включено"
+
+msgid "Enable or disable this dnspbr instance."
+msgstr "Включить или отключить этот экземпляр dnspbr."
 
 msgid "Enable or disable dnspbr service."
 msgstr "Включить или отключить службу dnspbr."
@@ -27,11 +81,17 @@ msgstr "Включить или отключить службу dnspbr."
 msgid "Listen IP"
 msgstr "IP-адрес прослушивания"
 
+msgid "IP address for the daemon instance to listen on."
+msgstr "IP-адрес, на котором этот экземпляр демона будет принимать подключения."
+
 msgid "IP address for the daemon to listen on."
 msgstr "IP-адрес, на котором демон будет принимать подключения."
 
 msgid "Listen Port"
 msgstr "Порт прослушивания"
+
+msgid "UDP port for the daemon instance to listen on."
+msgstr "UDP-порт, на котором этот экземпляр демона будет принимать подключения."
 
 msgid "Port for the daemon to listen on."
 msgstr "Порт, на котором демон будет принимать подключения."
@@ -51,11 +111,29 @@ msgstr "Порт вышестоящего DNS-сервера."
 msgid "Fake DNS Subnet"
 msgstr "Подсеть Fake DNS"
 
+msgid "Target subnet for Fake DNS policy routing (e.g. 10.64.0.0/16)."
+msgstr "Целевая подсеть для маршрутизации Fake DNS на основе политик (например, 10.64.0.0/16)."
+
 msgid "Target subnet for Fake DNS policy routing (e.g. 10.30.0.0/16)."
 msgstr "Целевая подсеть для маршрутизации Fake DNS на основе политик (например, 10.30.0.0/16)."
 
+msgid "nftables Table"
+msgstr "Таблица nftables"
+
+msgid "nftables table name (e.g. dnsmap_wg_ru)."
+msgstr "Имя таблицы nftables (например, dnsmap_wg_ru)."
+
+msgid "Routing Table"
+msgstr "Таблица маршрутизации"
+
+msgid "Policy routing table ID or name (e.g. 101)."
+msgstr "Номер или имя таблицы маршрутизации (например, 101)."
+
 msgid "Firewall Mark"
 msgstr "Метка межсетевого экрана (Fwmark)"
+
+msgid "Firewall mark value (e.g. 0x101)."
+msgstr "Значение метки межсетевого экрана (например, 0x101)."
 
 msgid "Firewall mark hex value (e.g. 0x40)."
 msgstr "Шестнадцатеричное значение метки межсетевого экрана (например, 0x40)."
@@ -63,11 +141,20 @@ msgstr "Шестнадцатеричное значение метки межс�
 msgid "Interface"
 msgstr "Интерфейс"
 
+msgid "Optional network interface for policy routing (e.g. wg0). Leave empty if not bound to an interface."
+msgstr "Необязательный сетевой интерфейс для маршрутизации (например, wg0). Оставьте пустым, если привязка к интерфейсу не нужна."
+
 msgid "Network interface name for policy routing (e.g. awg0)."
 msgstr "Имя сетевого интерфейса для маршрутизации на основе политик (например, awg0)."
 
+msgid "-- none --"
+msgstr "-- не задан --"
+
 msgid "Workers"
 msgstr "Рабочие потоки"
+
+msgid "Number of worker threads for this instance."
+msgstr "Количество рабочих потоков для этого экземпляра."
 
 msgid "Number of worker threads."
 msgstr "Количество рабочих потоков демона."
@@ -81,14 +168,23 @@ msgstr "Включить подробный вывод отладочной ин
 msgid "Domain Lists"
 msgstr "Списки доменов"
 
+msgid "Edit domain lists and generate dnsmasq forwarding rules per dnspbr instance."
+msgstr "Редактирование списков доменов и генерация правил пересылки dnsmasq для каждого экземпляра dnspbr."
+
 msgid "Edit domains for policy routing."
 msgstr "Редактирование доменов для маршрутизации на основе политик."
 
 msgid "Edit domains for policy routing. Enter one domain per line (e.g. youtube.com)."
 msgstr "Редактирование доменов для маршрутизации на основе политик. Вводите по одному домену на строку (например, youtube.com)."
 
+msgid "Instance"
+msgstr "Экземпляр"
+
 msgid "Generate Dnsmasq rules"
 msgstr "Генерировать правила Dnsmasq"
+
+msgid "Automatically generate server=/domain/listen#port config for selected instance"
+msgstr "Автоматически создавать конфиг server=/domain/listen#port для выбранного экземпляра"
 
 msgid "Automatically create server=/domain/ip#port config files"
 msgstr "Автоматически создавать конфигурационные файлы server=/domain/ip#port"
@@ -96,11 +192,17 @@ msgstr "Автоматически создавать конфигурацион
 msgid "Enter domains below (one per line):"
 msgstr "Введите домены ниже (по одному на строку):"
 
+msgid "Domain list for instance \"%s\" saved and applied."
+msgstr "Список доменов для экземпляра «%s» сохранён и применён."
+
 msgid "Domain list saved and applied to Dnsmasq successfully."
 msgstr "Список доменов успешно сохранён и применён к Dnsmasq."
 
 msgid "Domain list saved successfully (Dnsmasq integration disabled)."
 msgstr "Список доменов успешно сохранён (интеграция с Dnsmasq отключена)."
+
+msgid "Failed to save domain list: "
+msgstr "Не удалось сохранить список доменов: "
 
 msgid "Failed to save file: "
 msgstr "Не удалось сохранить файл: "

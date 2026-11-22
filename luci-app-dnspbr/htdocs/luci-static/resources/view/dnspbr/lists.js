@@ -4,104 +4,159 @@
 'require fs';
 'require uci';
 'require ui';
+'require rpc';
+
+var callInitAction = rpc.declare({
+	object: 'luci',
+	method: 'setInitAction',
+	params: ['name', 'action'],
+	expect: { result: false }
+});
+
+function sanitizeName(name) {
+	return (name || 'default').replace(/[^a-zA-Z0-9_-]/g, '_');
+}
 
 return view.extend({
-    load: function() {
-        return Promise.all([
-            fs.read('/etc/dnspbr/domains.list').catch(function() { return ''; }),
-            uci.load('dnspbr')
-        ]);
-    },
+	load: function() {
+		return uci.load('dnspbr').then(function() {
+			var sections = uci.sections('dnspbr', 'instance');
+			var names = sections.map(function(s) { return s['.name']; });
+			if (names.length === 0)
+				names = ['default'];
 
-    render: function(data) {
-        var content = data[0] || '';
-        var m, s;
+			var active = names[0];
+			var safe = sanitizeName(active);
+			var listPath = '/etc/dnspbr/lists/' + safe + '.list';
 
-        m = new form.Map('dnspbr', _('Domain Lists'), _('Edit domains for policy routing.'));
-        m.readonly = false;
+			return Promise.all([
+				Promise.resolve(names),
+				Promise.resolve(active),
+				fs.read(listPath).catch(function() {
+					return fs.read('/etc/dnspbr/domains.list').catch(function() { return ''; });
+				})
+			]);
+		});
+	},
 
-        m.save = function() {
-            var textarea = document.getElementById('domain_content');
-            var rawData = textarea ? textarea.value : '';
-            rawData = rawData.replace(/\r\n/g, '\n');
+	render: function(data) {
+		var instanceNames = data[0] || ['default'];
+		var currentInstance = data[1] || instanceNames[0];
+		var content = data[2] || '';
 
-            var checkbox = document.getElementById('dnsmasq_integration');
-            var useDnsmasq = checkbox ? checkbox.checked : false;
+		var m = new form.Map('dnspbr', _('Domain Lists'),
+			_('Edit domain lists and generate dnsmasq forwarding rules per dnspbr instance.')
+		);
+		m.readonly = false;
 
-            var lines = rawData.split(/\r?\n/);
-            var cleanDomains = [];
+		var loadForInstance = function(instName) {
+			currentInstance = instName;
+			var safe = sanitizeName(instName);
+			var listPath = '/etc/dnspbr/lists/' + safe + '.list';
+			return fs.read(listPath).catch(function() { return ''; }).then(function(text) {
+				var ta = document.getElementById('domain_content');
+				if (ta)
+					ta.value = text || '';
+			});
+		};
 
-            for (var i = 0; i < lines.length; i++) {
-                var domain = lines[i].trim();
-                if (!domain || domain.indexOf('#') === 0) continue;
-                cleanDomains.push(domain);
-            }
+		m.save = function() {
+			var selectEl = document.getElementById('instance_select');
+			var instName = selectEl ? selectEl.value : currentInstance;
+			var safe = sanitizeName(instName);
 
-            // If the checkbox is unchecked, we save the raw list of domains as is (without parsing).
-            if (!useDnsmasq) {
-                var savedText = cleanDomains.join('\n') + (cleanDomains.length > 0 ? '\n' : '');
-                return Promise.all([
-                    fs.write('/etc/dnspbr/domains.list', savedText),
-                    // Удаляем сгенерированный dnsmasq-конфиг, если интеграция выключена
-                    fs.remove('/etc/dnspbr/dnsmasq/domains.conf').catch(function() {})
-                ]).then(function() {
-                    return fs.exec('/etc/init.d/dnspbr', ['reload']).catch(function() {});
-                }).then(function() {
-                    ui.addNotification(null, E('p', _('Domain list saved successfully (Dnsmasq integration disabled).')), 'success');
-                }).catch(function(e) {
-                    ui.addNotification(null, E('p', _('Failed to save file: ') + (e.message || e)), 'error');
-                });
-            }
+			var textarea = document.getElementById('domain_content');
+			var rawData = (textarea ? textarea.value : '').replace(/\r\n/g, '\n');
 
-            // If the checkbox is selected, we generate rules for dnsmasq.
-            var ip = uci.get('dnspbr', 'global', 'address') || '127.0.0.1';
-            var port = uci.get('dnspbr', 'global', 'port') || '5353';
+			var checkbox = document.getElementById('dnsmasq_integration');
+			var useDnsmasq = checkbox ? checkbox.checked : false;
 
-            var dnsmasqLines = [];
-            for (var j = 0; j < cleanDomains.length; j++) {
-                dnsmasqLines.push('server=/' + cleanDomains[j] + '/' + ip + '#' + port);
-            }
+			var lines = rawData.split(/\r?\n/);
+			var cleanDomains = [];
+			for (var i = 0; i < lines.length; i++) {
+				var domain = lines[i].trim();
+				if (!domain || domain.indexOf('#') === 0)
+					continue;
+				cleanDomains.push(domain);
+			}
 
-            var savedTextFull = cleanDomains.join('\n') + (cleanDomains.length > 0 ? '\n' : '');
-            var dnsmasqConfigText = '# Auto-generated by luci-app-dnspbr\n' + dnsmasqLines.join('\n') + (dnsmasqLines.length > 0 ? '\n' : '');
+			var savedText = cleanDomains.join('\n') + (cleanDomains.length > 0 ? '\n' : '');
+			var listPath = '/etc/dnspbr/lists/' + safe + '.list';
+			var dnsmasqPath = '/etc/dnspbr/dnsmasq/' + safe + '.conf';
 
-            return Promise.all([
-                fs.write('/etc/dnspbr/domains.list', savedTextFull),
-                fs.write('/etc/dnspbr/dnsmasq/domains.conf', dnsmasqConfigText)
-            ]).then(function() {
-                return fs.exec('/etc/init.d/dnspbr', ['reload']);
-            }).then(function() {
-                ui.addNotification(null, E('p', _('Domain list saved and applied to Dnsmasq successfully.')), 'success');
-            }).catch(function(e) {
-                ui.addNotification(null, E('p', _('Failed to save domain list: ') + (e.message || e)), 'error');
-            });
-        };
+			var fileOps = [
+				fs.exec('/bin/mkdir', ['-p', '/etc/dnspbr/lists', '/etc/dnspbr/dnsmasq']).catch(function() {}),
+				fs.write(listPath, savedText)
+			];
 
-        s = m.section(form.NamedSection, 'global', 'dnspbr', '');
-        s.render = function() {
-            return E('div', { class: 'cbi-section' }, [
-                E('div', { class: 'cbi-value', style: 'margin-bottom: 15px;' }, [
-                    E('label', { class: 'cbi-value-title', style: 'width: auto; margin-right: 10px;' }, _('Generate Dnsmasq rules')),
-                    E('div', { class: 'cbi-value-field' }, [
-                        E('input', {
-                            id: 'dnsmasq_integration',
-                            type: 'checkbox',
-                            checked: 'checked' // По умолчанию включено
-                        }),
-                        E('span', { style: 'margin-left: 8px; font-size: 90%; color: #666;' }, _('Automatically create server=/domain/ip#port config files'))
-                    ])
-                ]),
-                E('p', {}, _('Enter domains below (one per line):')),
-                E('textarea', {
-                    id: 'domain_content',
-                    name: 'domain_content',
-                    rows: 25,
-                    style: 'width: 100%; font-family: monospace; white-space: pre;',
-                    wrap: 'off'
-                }, content || '')
-            ]);
-        };
+			if (useDnsmasq) {
+				var ip = uci.get('dnspbr', instName, 'listen') || uci.get('dnspbr', instName, 'address') || '127.0.0.1';
+				var port = uci.get('dnspbr', instName, 'port') || '5353';
+				var dnsmasqLines = cleanDomains.map(function(d) {
+					return 'server=/' + d + '/' + ip + '#' + port;
+				});
+				var dnsmasqConfigText = '# Auto-generated by luci-app-dnspbr for instance ' + instName + '\n' +
+					dnsmasqLines.join('\n') + (dnsmasqLines.length > 0 ? '\n' : '');
+				fileOps.push(fs.write(dnsmasqPath, dnsmasqConfigText));
+			} else {
+				fileOps.push(fs.remove(dnsmasqPath).catch(function() {}));
+			}
 
-        return m.render();
-    }
+			return Promise.all(fileOps).then(function() {
+				return callInitAction('dnspbr', 'reload').catch(function() {
+					return fs.exec('/etc/init.d/dnspbr', ['reload']);
+				});
+			}).then(function() {
+				ui.addNotification(null, E('p', _('Domain list for instance "%s" saved and applied.').format(instName)), 'success');
+			}).catch(function(e) {
+				ui.addNotification(null, E('p', _('Failed to save domain list: ') + (e.message || e)), 'error');
+			});
+		};
+
+		var s = m.section(form.TypedSection, 'instance', '');
+		s.render = function() {
+			var options = instanceNames.map(function(name) {
+				return E('option', {
+					value: name,
+					selected: name === currentInstance ? 'selected' : null
+				}, name);
+			});
+
+			return E('div', { class: 'cbi-section' }, [
+				E('div', { class: 'cbi-value', style: 'margin-bottom: 12px;' }, [
+					E('label', { class: 'cbi-value-title', for: 'instance_select' }, _('Instance')),
+					E('div', { class: 'cbi-value-field' }, [
+						E('select', {
+							id: 'instance_select',
+							class: 'cbi-input-select',
+							change: function(ev) { loadForInstance(ev.target.value); }
+						}, options)
+					])
+				]),
+				E('div', { class: 'cbi-value', style: 'margin-bottom: 15px;' }, [
+					E('label', { class: 'cbi-value-title', for: 'dnsmasq_integration' }, _('Generate Dnsmasq rules')),
+					E('div', { class: 'cbi-value-field' }, [
+						E('input', {
+							id: 'dnsmasq_integration',
+							type: 'checkbox',
+							checked: 'checked'
+						}),
+						E('span', { style: 'margin-left: 8px; font-size: 90%; color: #666;' },
+							_('Automatically generate server=/domain/listen#port config for selected instance')
+						)
+					])
+				]),
+				E('p', {}, _('Enter domains below (one per line):')),
+				E('textarea', {
+					id: 'domain_content',
+					name: 'domain_content',
+					rows: 25,
+					style: 'width: 100%; font-family: monospace; white-space: pre;',
+					wrap: 'off'
+				}, content || '')
+			]);
+		};
+
+		return m.render();
+	}
 });
