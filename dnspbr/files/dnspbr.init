@@ -23,7 +23,10 @@ sync_dnsmasq_configs() {
 	dnsmasq_dir=$(find_dnsmasq_dir)
 	[ -z "$dnsmasq_dir" ] && return 1
 
+	local had_old=0
+	ls "$dnsmasq_dir"/dnspbr_*.conf >/dev/null 2>&1 && had_old=1
 	rm -f "$dnsmasq_dir"/dnspbr_*.conf
+
 	local found=0
 	local conf
 
@@ -34,34 +37,44 @@ sync_dnsmasq_configs() {
 		fi
 	done
 
-	if [ "$found" -eq 1 ]; then
+	if [ "$found" -eq 1 ] || [ "$had_old" -eq 1 ]; then
 		/etc/init.d/dnsmasq restart
 	fi
 }
 
 cleanup_instance() {
 	local s="$1"
-	local table route_table mark range state_file old_range
+	local table route_table mark state_file
 
 	config_get table "$s" "table" "dnsmap_${s}"
 	config_get route_table "$s" "route_table" "100"
 	config_get mark "$s" "mark" "0"
-	config_get range "$s" "range" ""
 
 	state_file="/var/run/dnspbr_${s}.range"
-	old_range=""
-	[ -f "$state_file" ] && old_range=$(cat "$state_file")
+	rm -f "$state_file"
 
-	if [ -n "$old_range" ] && [ "$old_range" != "$range" ]; then
+	if [ -n "$table" ]; then
 		nft flush table ip "$table" 2>/dev/null
 		nft delete table ip "$table" 2>/dev/null
+		nft flush table ip "mangle_${table}" 2>/dev/null
+		nft delete table ip "mangle_${table}" 2>/dev/null
 	fi
-	[ -n "$range" ] && printf '%s\n' "$range" > "$state_file"
 
 	if [ -n "$mark" ] && [ "$mark" != "0" ]; then
-		ip rule del fwmark "$mark" table "$route_table" 2>/dev/null
+		while ip rule del fwmark "$mark" table "$route_table" 2>/dev/null; do
+			:
+		done
 	fi
 	[ -n "$route_table" ] && ip route flush table "$route_table" 2>/dev/null
+}
+
+disable_instance_conf() {
+	local s="$1"
+	local enabled
+	config_get_bool enabled "$s" "enabled" 0
+	if [ "$enabled" -eq 0 ]; then
+		rm -f "/etc/dnspbr/dnsmasq/${s}.conf"
+	fi
 }
 
 get_instance_iface() {
@@ -93,6 +106,8 @@ start_instance() {
 	config_get workers "$s" "workers" ""
 	config_get_bool verbose "$s" "verbose" 0
 
+	[ -n "$range" ] && printf '%s\n' "$range" > "/var/run/dnspbr_${s}.range"
+
 	procd_open_instance "$s"
 	procd_set_param command "$PROG" -a "$address" -p "$port" -u "$upstream" -t "$table" -T "$route_table" -m "$mark"
 	[ -n "$upstream_port" ] && procd_append_param command -P "$upstream_port"
@@ -109,6 +124,7 @@ start_instance() {
 
 start_service() {
 	config_load "$CONF"
+	config_foreach disable_instance_conf instance
 	sync_dnsmasq_configs
 	config_foreach start_instance instance
 }
