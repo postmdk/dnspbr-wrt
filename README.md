@@ -217,7 +217,7 @@ To compile `dnspbr` using an official OpenWrt SDK:
 
 3. Compiled output will be available under:
    `bin/packages/<arch>/dnspbr/`
-
+## See also [dnspbr for linux](https://github.com/postmdk/dnspbr.git)
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
