@@ -1,22 +1,30 @@
 {
-  "luci-app-dnspbr": {
-    "description": "Grant UCI, file and ubus status access for luci-app-dnspbr",
-    "read": {
-      "uci": [ "dnspbr" ],
-      "ubus": {
-        "service": [ "*" ]
-      },
-      "file": {
-        "/etc/dnspbr/*": [ "read" ],
-        "/etc/init.d/dnspbr": [ "exec" ]
-      }
-    },
-    "write": {
-      "uci": [ "dnspbr" ],
-      "file": {
-        "/etc/dnspbr/*": [ "write" ],
-        "/etc/init.d/dnspbr": [ "exec" ]
-      }
+    "luci-app-dnspbr": {
+	"description": "Grant UCI, file and ubus access for luci-app-dnspbr",
+	"read": {
+	    "uci": [ "dnspbr" ],
+	    "ubus": {
+		"service": [ "*" ],
+		"luci": [ "setInitAction" ]
+	    },
+	    "file": {
+		"/etc/dnspbr/*": [ "read" ],
+		"/etc/dnspbr/lists/*": [ "read" ],
+		"/etc/dnspbr/dnsmasq/*": [ "read" ],
+		"/etc/init.d/dnspbr": [ "exec" ]
+	    }
+	},
+	"write": {
+	    "uci": [ "dnspbr" ],
+	    "ubus": {
+		"luci": [ "setInitAction" ]
+	    },
+	    "file": {
+		"/etc/dnspbr/*": [ "write" ],
+		"/etc/dnspbr/lists/*": [ "write" ],
+		"/etc/dnspbr/dnsmasq/*": [ "write" ],
+		"/etc/init.d/dnspbr": [ "exec" ]
+	    }
+	}
     }
-  }
 }
