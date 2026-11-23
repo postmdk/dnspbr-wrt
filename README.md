@@ -10,7 +10,7 @@ It intercepts DNS queries for target domains, maps resolved IP addresses into vi
 * **High Performance & Low Latency:** Written in native C++ with multi-threading support (`libpthread`).
 * **Dynamic IP Mapping:** Automatically intercepts DNS responses and maps resolved IPs into predefined internal subnets (`range`).
 * **`nftables` Integration:** Dynamically creates per-instance `nftables` DNAT and mangle tables (`dnsmap_<instance>` and `mangle_dnsmap_<instance>`) to tag matching traffic with `fwmark`.
-* **Modern OpenWrt Support:** Dynamic discovery of jail/chroot paths for `dnsmasq` (`/tmp/dnsmasq.*.d/`) and per-instance domain forwarding configs.
+* **Modern OpenWrt Support:** Dynamic discovery of jail/chroot paths for `dnsmasq` (`/tmp/dnsmasq*d/`) and per-instance domain forwarding configs.
 * **LuCI Web UI (`luci-app-dnspbr`):** Full web interface support for managing multiple instances, monitoring per-instance daemon status, and editing domain lists per instance.
 * **Multi-Arch & Multi-Version Builds:** Pre-compiled binaries for `aarch64_cortex-a53` and `mipsel_24kc` supporting OpenWrt versions `24.10.x` (`.ipk`) and `25.12.x` (`.apk`).
 
@@ -105,7 +105,7 @@ config instance 'awg1'
 
 ### Dnsmasq Configuration
 
-`dnspbr` integrates seamlessly with `dnsmasq` by dynamically injecting per-instance domain rules into active configuration directories (including chroot/jail environments like `/tmp/dnsmasq.*.d/`).
+`dnspbr` integrates seamlessly with `dnsmasq` by dynamically injecting per-instance domain rules into active configuration directories (including chroot/jail environments like `/tmp/dnsmasq*d/`).
 
 Disable DNS rebind protection so `dnsmasq` accepts synthetic private IP responses (`10.x.x.x`) from `dnspbr`:
 ```bash
@@ -126,7 +126,7 @@ server=/example.com/127.0.0.1#5353
 server=/another-example.org/127.0.0.1#5453
 ```
 
-1. Upon startup or reload, `/etc/init.d/dnspbr` automatically copies active `*.conf` files from `/etc/dnspbr/dnsmasq/` into the active `dnsmasq` config directory (`/tmp/dnsmasq.*.d/dnspbr_<instance>.conf`) and restarts `dnsmasq`.
+1. Upon startup or reload, `/etc/init.d/dnspbr` automatically copies active `*.conf` files from `/etc/dnspbr/dnsmasq/` into the active `dnsmasq` config directory (`/tmp/dnsmasq*d/dnspbr_<instance>.conf`) and restarts `dnsmasq`.
 2. When an instance is disabled (`enabled '0'`), its `nftables` tables, routing rules, and active `dnsmasq` forwarding file are automatically cleaned up.
 3. Install `luci-app-dnspbr` to manage instances and per-instance domain lists directly from the OpenWrt LuCI web interface.
 
