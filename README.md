@@ -23,7 +23,7 @@ Below is the conceptual diagram showing how DNS requests and data traffic are pr
        │
        │ 1. DNS Query (e.g., domain-a.com / domain-b.com)
        ▼
-[ dnsmasq / Unbound ]
+[ dnsmasq ]
        ├──(server=/domain-a.com/127.0.0.1#5353)──► [ dnspbr (awg0) ] (Port 5353)
        └──(server=/domain-b.com/127.0.0.1#5453)──► [ dnspbr (awg1) ] (Port 5453)
                                                            │
