@@ -183,6 +183,12 @@ return view.extend({
 		o.default = '2';
 		o.rmempty = false;
 
+		o = s.option(form.Flag, 'output', _('OUTPUT Chains'),
+			_('Enable OUTPUT chains for local traffic NAT and marking (-o).')
+		);
+		o.default = o.disabled;
+		o.rmempty = true;
+
 		o = s.option(form.Flag, 'verbose', _('Verbose Logging'),
 			_('Enable detailed debug output.')
 		);
