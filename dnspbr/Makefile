@@ -7,7 +7,7 @@ PKG_RELEASE:=1
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/postmdk/dnspbr.git
 PKG_SOURCE_VERSION:=85e5aa821efa4af984f924db2aab9ed43c58b1eb
-PKG_MIRROR_HASH:=skip
+PKG_MIRROR_HASH:=701bd0718ce4ff5961971b96a61bec3680cff2ab2ab300a344860bb52eb79d55
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
@@ -24,8 +24,8 @@ define Package/dnspbr
 endef
 
 define Build/Compile
-	$(MAKE) -C $(PKG_BUILD_DIR) \
-		ENABLE_OUTPUT=1 \
+	$(MAKE) ENABLE_OUTPUT=1 \
+		-C $(PKG_BUILD_DIR) \
 		CXX="$(TARGET_CXX)" \
 		CXXFLAGS="$(TARGET_CXXFLAGS) -std=c++17 -O2 -DVERSION=\\\"$(PKG_VERSION)\\\"" \
 		LDFLAGS="$(TARGET_LDFLAGS) -lldns -lnftables -pthread"
