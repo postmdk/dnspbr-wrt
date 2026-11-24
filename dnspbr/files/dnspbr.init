@@ -104,6 +104,7 @@ start_instance() {
 	config_get route_table "$s" "route_table" "100"
 	tunnel_iface=$(get_instance_iface "$s")
 	config_get workers "$s" "workers" ""
+	config_get_bool output "$s" "output" 0
 	config_get_bool verbose "$s" "verbose" 0
 
 	[ -n "$range" ] && printf '%s\n' "$range" > "/var/run/dnspbr_${s}.range"
@@ -114,6 +115,7 @@ start_instance() {
 	[ -n "$range" ] && procd_append_param command -r "$range"
 	[ -n "$tunnel_iface" ] && procd_append_param command -i "$tunnel_iface"
 	[ -n "$workers" ] && procd_append_param command -w "$workers"
+	[ "$output" -eq 1 ] && procd_append_param command -o
 	[ "$verbose" -eq 1 ] && procd_append_param command -v
 
 	procd_set_param respawn

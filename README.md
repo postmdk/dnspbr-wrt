@@ -10,6 +10,7 @@ It intercepts DNS queries for target domains, maps resolved IP addresses into vi
 * **High Performance & Low Latency:** Written in native C++ with multi-threading support (`libpthread`).
 * **Dynamic IP Mapping:** Automatically intercepts DNS responses and maps resolved IPs into predefined internal subnets (`range`).
 * **`nftables` Integration:** Dynamically creates per-instance `nftables` DNAT and mangle tables (`dnsmap_<instance>` and `mangle_dnsmap_<instance>`) to tag matching traffic with `fwmark`.
+* **Local Router Traffic (`OUTPUT` Chain Support):** Optional `output` setting (`-o` flag) generates `OUTPUT` (NAT) and `output` (mangle) chains in addition to `PREROUTING` / `prerouting`, enabling DNAT and `fwmark` routing for traffic originating on the router itself (such as local proxies or system tools).
 * **Modern OpenWrt Support:** Dynamic discovery of jail/chroot paths for `dnsmasq` (`/tmp/dnsmasq*d/`) and per-instance domain forwarding configs.
 * **LuCI Web UI (`luci-app-dnspbr`):** Full web interface support for managing multiple instances, monitoring per-instance daemon status, and editing domain lists per instance.
 * **Multi-Arch & Multi-Version Builds:** Pre-compiled binaries for `aarch64_cortex-a53` and `mipsel_24kc` supporting OpenWrt versions `24.10.x` (`.ipk`) and `25.12.x` (`.apk`).
@@ -36,6 +37,8 @@ Below is the conceptual diagram showing how DNS requests and data traffic are pr
        │ 4. HTTP/TLS Traffic to Mapped IP
        ▼
 [ Linux Kernel (nftables) ]
+       ├─ PREROUTING / prerouting (LAN clients)
+       |─ OUTPUT / output (Local router traffic, requires output '1' / -o)
        ├──(Matches 10.64.0.0/16 in dnsmap_awg0)──► Set mark 0x101 ──► Table 101 ──► [ awg0 ]
        └──(Matches 10.32.0.0/16 in dnsmap_awg1)──► Set mark 0x102 ──► Table 102 ──► [ awg1 ]
 ```
@@ -68,6 +71,7 @@ config instance 'awg0'
     option route_table '101'
     option mark '0x101'
     option interface 'awg0'
+    option output '1'
     option workers '2'
     option verbose '0'
 
@@ -82,26 +86,28 @@ config instance 'awg1'
     option route_table '102'
     option mark '0x102'
     option interface 'awg1'
+    option output '0'
     option workers '2'
     option verbose '0'
 ```
 
 ### Option Reference
 
-| Option | Type | Default | Description |
-| ----- | ----- | ----- | ----- |
-| `enabled` | `boolean` | `0` | Enables (`1`) or disables (`0`) this `dnspbr` instance. |
-| `listen` | `ipaddr` | `127.0.0.1` | Local IP address for the instance to listen for incoming DNS queries. |
-| `port` | `port` | `5353` | Local UDP port on which the instance accepts DNS traffic from `dnsmasq`. |
-| `upstream` | `ipaddr` | `9.9.9.10` | IP address of the upstream resolver (e.g., `127.0.0.1` or SmartDNS). |
-| `upstream_port` | `port` | `53` | Upstream DNS port to query for actual public IP resolution. |
-| `range` | `cidr` | `10.30.0.0/16` | Virtual subnet range allocated for mapping resolved host IPs for this instance. |
-| `table` | `string` | `dnsmap_<name>` | Dedicated `nftables` table name created for this instance. |
-| `route_table` | `string` | `101` | Policy routing table ID or name used for this instance. |
-| `mark` | `hex` | `0x101` | Hexadecimal firewall mark (`fwmark`) assigned to matching traffic. |
-| `interface` | `string` | *(optional)* | Target network interface to route tagged traffic through (e.g., `awg0`, `wg0`). |
-| `workers` | `integer` | `2` | Number of worker threads for processing concurrent DNS resolutions. |
-| `verbose` | `boolean` | `0` | Enables (`1`) detailed debug logging for this instance. |
+| Option          | Type | Default | Description                                                                                                                                                  |
+|-----------------| ----- | ----- |--------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `enabled`       | `boolean` | `0` | Enables (`1`) or disables (`0`) this `dnspbr` instance.                                                                                                      |
+| `listen`        | `ipaddr` | `127.0.0.1` | Local IP address for the instance to listen for incoming DNS queries.                                                                                        |
+| `port`          | `port` | `5353` | Local UDP port on which the instance accepts DNS traffic from `dnsmasq`.                                                                                     |
+| `upstream`      | `ipaddr` | `9.9.9.10` | IP address of the upstream resolver (e.g., `127.0.0.1` or SmartDNS).                                                                                         |
+| `upstream_port` | `port` | `53` | Upstream DNS port to query for actual public IP resolution.                                                                                                  |
+| `range`         | `cidr` | `10.30.0.0/16` | Virtual subnet range allocated for mapping resolved host IPs for this instance.                                                                              |
+| `table`         | `string` | `dnsmap_<name>` | Dedicated `nftables` table name created for this instance.                                                                                                   |
+| `route_table`   | `string` | `101` | Policy routing table ID or name used for this instance.                                                                                                      |
+| `mark`          | `hex` | `0x101` | Hexadecimal firewall mark (`fwmark`) assigned to matching traffic.                                                                                           |
+| `interface`     | `string` | *(optional)* | Target network interface to route tagged traffic through (e.g., `awg0`, `wg0`).                                                                              |
+| `workers`       | `integer` | `2` | Number of worker threads for processing concurrent DNS resolutions.                                                                                          |
+| `output`        | `boolean` | `0` | Enable ( `1` ) OUTPUT (NAT) and output (mangle) chains (passes -o) for traffic originating on the router itself; requires dnspbr built with ENABLE_OUTPUT=1. |
+| `verbose`       | `boolean` | `0` | Enables (`1`) detailed debug logging for this instance.                                                                                                      |
 
 ### Dnsmasq Configuration
 

@@ -159,6 +159,12 @@ msgstr "Количество рабочих потоков для этого э�
 msgid "Number of worker threads."
 msgstr "Количество рабочих потоков демона."
 
+msgid "OUTPUT Chains"
+msgstr "Цепочки OUTPUT"
+
+msgid "Enable OUTPUT chains for local traffic NAT and marking (-o)."
+msgstr "Включить цепочки OUTPUT для NAT и маркировки локального трафика (-o)."
+
 msgid "Verbose Logging"
 msgstr "Подробное журналирование"
 

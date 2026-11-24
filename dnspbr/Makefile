@@ -1,13 +1,13 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=dnspbr
-PKG_VERSION:=1.2.1
+PKG_VERSION:=1.2.2
 PKG_RELEASE:=1
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/postmdk/dnspbr.git
-PKG_SOURCE_VERSION:=a847e92abb359ccc5f371ed9361264f214582da1
-PKG_MIRROR_HASH:=a83b632a8e81c6dc0fcabc080c0e38a0300b92c0fdc8b39e6622c1739f1f979b
+PKG_SOURCE_VERSION:=a1f1d45b1e5d8d6b5bbadf2f1ff1d439065f3320
+PKG_MIRROR_HASH:=4b6d4d6f48f83cb842c99b4d6aebe5754c1f1e49429684a8026be0c5b179a9db
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
@@ -24,7 +24,8 @@ define Package/dnspbr
 endef
 
 define Build/Compile
-	$(MAKE) -C $(PKG_BUILD_DIR) \
+	$(MAKE) ENABLE_OUTPUT=1 \
+		-C $(PKG_BUILD_DIR) \
 		CXX="$(TARGET_CXX)" \
 		CXXFLAGS="$(TARGET_CXXFLAGS) -std=c++17 -O2 -DVERSION=\\\"$(PKG_VERSION)\\\"" \
 		LDFLAGS="$(TARGET_LDFLAGS) -lldns -lnftables -pthread"
